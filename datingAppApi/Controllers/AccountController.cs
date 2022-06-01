@@ -40,27 +40,27 @@ namespace datingAppApi.Controllers
                 context.Users.Add(user);
                 await context.SaveChangesAsync();
 
-                return new UserDto { Username=user.UserName, Token= tokenService.CreateToken(user)};
+                return new UserDto { UserName=user.UserName, Token= tokenService.CreateToken(user)};
 
             
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<UserDto>> Login(LoginDto request)
+        private async Task<ActionResult<UserDto>> Login(LoginDto request)
         {
             var user = await context.Users.SingleOrDefaultAsync(x => x.UserName == request.Username);
             if (user == null) return Unauthorized("Invalid username");
 
             using var hmac = new HMACSHA512(user.PasswordSalt);
 
-            var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(request.Passsword));
+            var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(request.Password));
 
             for (int i = 0; i < computedHash.Length; i++)
             {
                 if (computedHash[i] != user.PasswordHash[i]) return Unauthorized("Invalid Password");
             }
 
-            return new UserDto {Username=user.UserName, Token=tokenService.CreateToken(user) };
+            return new UserDto {UserName=user.UserName, Token=tokenService.CreateToken(user) };
         }
 
         private async Task<bool> UserExists(string userName)

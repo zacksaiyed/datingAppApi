@@ -1,4 +1,5 @@
 ﻿using datingAppApi.Data;
+using datingAppApi.Helpers;
 using datingAppApi.Interfaces;
 using datingAppApi.Services;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +16,12 @@ namespace datingAppApi.Extensions
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config)
         {
+            services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));
             services.AddScoped<ITokenService, TokenServices>();
+            services.AddScoped<IPhotoService, PhotoService>();
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
+
             services.AddDbContext<DataContext>(options =>
             {
                 options.UseSqlite(config.GetConnectionString("DefaultConnection"));
